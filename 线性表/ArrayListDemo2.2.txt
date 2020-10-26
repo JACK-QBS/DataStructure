@@ -1,0 +1,185 @@
+package 线性表;
+
+import java.util.*;
+
+/**
+ * “捉鬼” 扑克小游戏：
+ *  A- 5 ，20 张牌，去掉一张 A
+ *  五个人依次抓牌，直到把所有的牌都抓光。抓拍阶段，一旦出现两张牌点数相同（凑成一对）就可以扔掉了
+ *
+ *  正式游戏：
+ *  一个回合一个回合进行：
+ *  每个人抽取下家的一张随机手牌：
+ *  1、如果下家的手牌被抽完了，则下家退出游戏
+ *  2、上家检查手中的牌有没有凑成一对，凑成了，还是把一对扔掉，如果扔掉一对后没手牌了，上家也退出
+ *  直到只剩一个人，即为抓到“鬼”了
+ */
+
+class Player1{
+    public String name; // 玩家姓名
+    public List<Card1> cards = new ArrayList<>();
+
+    public Player1(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Player1{" +
+                "name='" + name + '\'' +
+                ", cards=" + cards +
+                '}';
+    }
+}
+
+class Card1 {
+    public String suit; // 花色
+    public int rank; // 面值
+
+    public Card1(String suit, int rank) {
+        this.suit = suit;
+        this.rank = rank;
+    }
+
+    @Override
+    public String toString() {
+        return "{'" + suit + '\'' + ", " + rank + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Card)) return false;
+        Card card = (Card) o;
+        return rank == card.rank &&
+                Objects.equals(suit, card.suit);
+    }
+
+    // 只比较点数相同：
+    public boolean equalsRank(Card1 card) {
+        return rank == card.rank;
+    }
+
+}
+
+public class ArrayListDemo2 {
+    public static void main(String[] args) {
+        List<Player1> player1s = initializePlayerList();
+        List<Card1> cards1 = initializeCardList(); // 初始化
+        Collections.shuffle(cards1); // 洗牌
+
+        drawCard(player1s,cards1);
+        printHand(player1s);
+
+        // 把没有手牌的玩家去掉
+        Iterator<Player1> iterator = player1s.iterator();
+        while (iterator.hasNext()) {
+            Player1 next = iterator.next();
+            if(next.cards.isEmpty()) {
+                iterator.remove();
+            }
+        }
+
+        // 开始游戏
+        Random random = new Random();
+        while (true) {
+            // 只剩一名玩家就可以结束
+            if (player1s.size() == 1) {
+                break;
+            }
+
+            // 每名玩家抽取下家手牌
+            for (int i = 0; i < player1s.size(); i++) {
+                Player1 cur = player1s.get(i);
+                int nextIndex = i == player1s.size()-1 ? 0 : i+1;
+                Player1 next = player1s.get(nextIndex);
+                // cur 随机抽取 next 的下一张手牌
+                int randomIndex = random.nextInt(next.cards.size());
+                // 先吧牌抽出来
+                Card1 card1 = next.cards.remove(randomIndex);
+                // 如果下家的手牌为空了，下家退出
+                if (next.cards.isEmpty()) {
+                    player1s.remove(nextIndex);
+                }
+                // 尝试把抽出来的牌，加入当前玩家手中，但是，如果有对子，不用加
+                boolean needAdd = true;
+                Iterator<Card1> it2 = cur.cards.iterator();
+                while (it2.hasNext()) {
+                    if (it2.next().equalsRank(card1)) {
+                        it2.remove();
+                        needAdd = false;
+                    }
+                }
+                if (needAdd) {
+                    cur.cards.add(card1);
+                }
+                //
+                if (cur.cards.isEmpty()) {
+                    player1s.remove(i);
+                    i = i-1;
+                }
+
+            }
+        }
+        System.out.println(player1s);
+    }
+
+    private static void drawCard(List<Player1> player1s,List<Card1> card1s) {
+        while (true) {
+            for (Player1 player : player1s) {
+                if(card1s.isEmpty()) {
+                    // 唯一的出口
+                    return;
+                }
+
+                 // 抽一张牌
+                Card1 card1 = card1s.remove(0);
+                // 先检查一下有没有对子
+                boolean 是否需要把card加入手牌 = true;
+                Iterator<Card1> it = player.cards.iterator();
+                while (it.hasNext()) {
+                    Card1 everyCard = it.next();
+                    if (everyCard.equalsRank(card1)) {
+                        it.remove();
+                        是否需要把card加入手牌 = false;
+                    }
+                }
+                if (是否需要把card加入手牌) {
+                    player.cards.add(card1);
+                }
+            }
+        }
+
+    }
+
+    // 打印出每位玩家的 手牌
+    public static void printHand(List<Player1> players) {
+        for (Player1 player : players) {
+            System.out.printf(" %s 的手牌是： %s%n", player.name, player.cards);
+        }
+    }
+
+    private static List<Player1> initializePlayerList() {
+        List<Player1> player1s = new ArrayList<>();
+        player1s.add(new Player1("周润发"));
+        player1s.add(new Player1("刘德华"));
+        player1s.add(new Player1("周星驰"));
+        player1s.add(new Player1("作者乔"));
+        player1s.add(new Player1("帅气的你"));
+        return player1s;
+    }
+
+    private static List<Card1> initializeCardList() {
+        List<Card1> cards1 = new ArrayList<>();
+        for (String suit : new String[] {"♠","♥","♦","♣"}) {
+            for(int rank = 1;rank <= 4;rank++) {
+                Card1 card1 = new Card1(suit,rank);
+                // 把扑克牌放入牌组中
+                cards1.add(card1);
+            }
+        }
+        // 删掉黑桃A
+        return cards1;
+    }
+}
+
