@@ -1,0 +1,28 @@
+import java.util.*;
+public class Main{
+    public static void main(String[] args) {
+        //输入
+        Scanner sc = new Scanner(System.in);
+        String in = sc.nextLine();
+        String out = sc.nextLine();
+        //为了方便处理，将字符串统一转大写
+        in = in.toUpperCase();
+        out = out.toUpperCase();
+       
+        char[] inChar = in.toCharArray();
+        char[] outChar = out.toCharArray();
+        Set<Character> outSet = new TreeSet<>();
+        for (char o : outChar) {
+            outSet.add(o);
+        }
+        Set<Character> set = new TreeSet<>();//存放错误键盘的set（方便去重）
+        for (char i : inChar) {
+            if (!outSet.contains(i)) {
+                if (!set.contains(i)) {
+                    System.out.print(i);
+                }
+                set.add(i);
+            }
+        }
+    }
+}
