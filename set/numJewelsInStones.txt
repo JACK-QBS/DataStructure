@@ -1,0 +1,19 @@
+import java.util.*;
+class Solution {
+    public int numJewelsInStones(String jewels, String stones) {
+        Set<Character> gemstone = new HashSet<>();//存放宝石
+        char[] jChar = jewels.toCharArray();
+        for (char j : jChar) {
+            gemstone.add(j);
+        }
+        //遍历手中的石头，判断有没有宝石
+        int count = 0;
+        char[] sChar = stones.toCharArray();
+        for (char s : sChar) {
+            if (gemstone.contains(s)) {
+                count++;
+            }
+        }
+        return count;
+    }
+}
